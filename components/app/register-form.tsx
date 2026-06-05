@@ -31,17 +31,33 @@ export function RegisterForm() {
     setError(null);
     setLoading(true);
 
-    const response = await fetch("/api/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password, inviteCode }),
-    });
+    let response: Response;
 
-    const data = (await response.json()) as { error?: string };
+    try {
+      response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password, inviteCode }),
+      });
+    } catch {
+      setLoading(false);
+      setError("Network error while creating account. Please try again.");
+      return;
+    }
+
+    let data: { error?: string } = {};
+
+    try {
+      data = (await response.json()) as { error?: string };
+    } catch {
+      setLoading(false);
+      setError(`Registration failed (${response.status}). Please try again.`);
+      return;
+    }
 
     if (!response.ok) {
       setLoading(false);
-      setError(data.error ?? "Registration failed");
+      setError(data.error ?? `Registration failed (${response.status})`);
       return;
     }
 

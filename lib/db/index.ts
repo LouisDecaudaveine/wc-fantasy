@@ -34,6 +34,13 @@ function createDb(): Database {
     );
   }
 
+  console.info("[db] creating client", {
+    urlHost: url.startsWith("libsql://")
+      ? new URL(url.replace("libsql://", "https://")).host
+      : "local",
+    hasAuthToken: Boolean(authToken),
+  });
+
   const client = createClient({
     url,
     authToken,
