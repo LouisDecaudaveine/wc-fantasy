@@ -9,7 +9,7 @@ export function AppHeader() {
   const { data: session, status } = useSession();
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-background/95 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+    <header className="sticky top-0 z-40 border-b border-border/80 bg-card/90 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-card/75">
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
