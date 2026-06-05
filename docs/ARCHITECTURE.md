@@ -133,7 +133,7 @@ sequenceDiagram
 |---|---|---|
 | Bootstrap (manual) | 2 | Fetch all 104 WC 2026 fixtures + team flags |
 | Daily cron | 2 | Refresh upcoming match metadata |
-| Match-day cron (15 min) | 2 | Update live/finished scores, run scoring |
+| Match-day live sync (15 min, Phase 5) | 2 | Update live/finished scores, run scoring — external cron or Vercel Pro |
 
 Fixtures are cached in the `matches` table. The matches API reads from Turso only.
 

@@ -57,9 +57,9 @@ npm run db:push
 Build command: `npm run build`  
 Install command: `npm install`
 
-## Vercel Cron
+## Vercel Cron (Hobby / free tier)
 
-Add to `vercel.json`:
+Vercel Hobby allows **one cron invocation per day**. The repo ships with a single daily job in `vercel.json`:
 
 ```json
 {
@@ -67,24 +67,25 @@ Add to `vercel.json`:
     {
       "path": "/api/cron/sync-matches",
       "schedule": "0 6 * * *"
-    },
-    {
-      "path": "/api/cron/sync-matches",
-      "schedule": "*/15 * * * *"
     }
   ]
 }
 ```
 
-During the tournament, the 15-minute job handles live/finished score updates. The daily job refreshes fixture metadata.
+This refreshes all fixtures and scores finished matches once per day (~6:00 UTC, with up to ~1 hour slack on Hobby).
 
-Cron requests must include:
+Set `CRON_SECRET` in Vercel env — Vercel sends it as `Authorization: Bearer <CRON_SECRET>` on cron requests.
+
+### Live updates during the tournament
+
+For 15-minute live/finished score updates, complete **Phase 5** in [`PHASES.md`](./PHASES.md): use a free external scheduler (e.g. [cron-job.org](https://cron-job.org)) to call:
 
 ```
+GET https://your-app.vercel.app/api/cron/sync-matches?mode=live
 Authorization: Bearer <CRON_SECRET>
 ```
 
-Configure in Vercel Cron settings or use a middleware check in the route handler.
+Or upgrade to **Vercel Pro** and add the 15-minute job back to `vercel.json`.
 
 ## Match Data Source
 

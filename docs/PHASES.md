@@ -117,6 +117,7 @@ drizzle.config.ts
 - [x] Auth middleware protecting `(app)` routes
 - [x] Loading/error/empty states
 - [x] Edge cases: postponed matches, API failures
+- [x] Vercel Cron: daily sync only (Hobby tier — live sync deferred to Phase 5)
 - [ ] Deploy to Vercel with Turso prod DB + cron (manual — see `docs/DEPLOYMENT.md`)
 
 ### Acceptance Criteria
@@ -124,6 +125,41 @@ drizzle.config.ts
 - [x] Unauthenticated users redirected to `/login`
 - [ ] App live on Vercel (manual deploy)
 - [ ] Full match cycle tested on mobile device (manual QA)
+
+---
+
+## Phase 5 — Live Sync (external cron)
+
+**Goal:** Live and recently finished scores update during match days without Vercel Pro.
+
+Vercel Hobby only allows **one cron per day**. Phase 4 uses a daily Vercel cron for full fixture refresh. This phase adds a free external scheduler for 15-minute live sync.
+
+### Tasks
+
+- [ ] Create account on [cron-job.org](https://cron-job.org) (or equivalent)
+- [ ] Schedule `GET /api/cron/sync-matches?mode=live` every 15 minutes
+- [ ] Add `Authorization: Bearer <CRON_SECRET>` header to the job
+- [ ] Enable job before tournament match days; disable after the final
+
+### External cron job config
+
+| Field | Value |
+|---|---|
+| URL | `https://your-app.vercel.app/api/cron/sync-matches?mode=live` |
+| Method | GET |
+| Schedule | Every 15 minutes (`*/15 * * * *`) |
+| Header | `Authorization: Bearer <CRON_SECRET>` |
+
+### Acceptance Criteria
+
+- [ ] External job runs without 401 errors
+- [ ] Live match status updates within ~15 minutes of kickoff
+- [ ] Finished match scores and leaderboard points update same day (not next morning)
+
+### Alternatives
+
+- **Vercel Pro** — add the 15-min job back to `vercel.json` and skip this phase
+- **Manual** — curl the live endpoint during match days if you skip external cron
 
 ---
 
