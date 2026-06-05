@@ -11,11 +11,13 @@ Match data comes from [worldcup26.ir](https://worldcup26.ir) — a free, open-so
 
 ## Environment Variables
 
-Copy [`.env.example`](../.env.example) to `.env.local` for local dev.
+Copy [`.env.example`](../.env.example) to `.env` for local dev.
+
+For Vercel, use your production values (from `.env.prod`), **not** the local `.env` file. A common mistake is copying `TURSO_DATABASE_URL=file:local.db` to Vercel — that only works on your machine.
 
 | Variable | Required | Description |
 |---|---|---|
-| `TURSO_DATABASE_URL` | Yes | Turso libSQL URL, or `file:local.db` for local |
+| `TURSO_DATABASE_URL` | Yes | Turso `libsql://...` URL on Vercel; `file:local.db` for local dev only |
 | `TURSO_AUTH_TOKEN` | Turso cloud | Auth token (omit for local file) |
 | `AUTH_SECRET` | Yes | Random string for Auth.js (`openssl rand -base64 32`) |
 | `AUTH_URL` | Prod | Full app URL, e.g. `https://wc-fantasy.vercel.app` |
