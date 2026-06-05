@@ -1,5 +1,7 @@
 import { randomUUID } from "crypto";
 
+import { getEnv } from "@/lib/env";
+
 function serializeError(error: unknown) {
   if (error instanceof Error) {
     return {
@@ -20,12 +22,12 @@ function serializeError(error: unknown) {
 
 export function logEnvPresence(scope: string) {
   console.info(`[${scope}] env`, {
-    vercel: Boolean(process.env.VERCEL),
+    vercel: Boolean(getEnv("VERCEL")),
     nodeEnv: process.env.NODE_ENV,
-    hasTursoDatabaseUrl: Boolean(process.env.TURSO_DATABASE_URL?.trim()),
-    hasTursoAuthToken: Boolean(process.env.TURSO_AUTH_TOKEN?.trim()),
-    hasInviteCode: Boolean(process.env.INVITE_CODE),
-    hasAuthSecret: Boolean(process.env.AUTH_SECRET),
+    hasTursoDatabaseUrl: Boolean(getEnv("TURSO_DATABASE_URL")),
+    hasTursoAuthToken: Boolean(getEnv("TURSO_AUTH_TOKEN")),
+    hasInviteCode: Boolean(getEnv("INVITE_CODE")),
+    hasAuthSecret: Boolean(getEnv("AUTH_SECRET")),
   });
 }
 

@@ -2,6 +2,8 @@ import { createClient } from "@libsql/client";
 import { drizzle } from "drizzle-orm/libsql";
 import type { LibSQLDatabase } from "drizzle-orm/libsql";
 
+import { getEnv } from "@/lib/env";
+
 import * as schema from "./schema";
 
 type Database = LibSQLDatabase<typeof schema>;
@@ -9,13 +11,13 @@ type Database = LibSQLDatabase<typeof schema>;
 let dbInstance: Database | undefined;
 
 function resolveDatabaseUrl(): string {
-  const url = process.env.TURSO_DATABASE_URL?.trim();
+  const url = getEnv("TURSO_DATABASE_URL");
 
   if (url) {
     return url;
   }
 
-  if (process.env.VERCEL || process.env.NODE_ENV === "production") {
+  if (getEnv("VERCEL") || process.env.NODE_ENV === "production") {
     throw new Error(
       "TURSO_DATABASE_URL is not set. Add it to your Vercel project environment variables.",
     );
@@ -26,7 +28,7 @@ function resolveDatabaseUrl(): string {
 
 function createDb(): Database {
   const url = resolveDatabaseUrl();
-  const authToken = process.env.TURSO_AUTH_TOKEN?.trim();
+  const authToken = getEnv("TURSO_AUTH_TOKEN");
 
   if (url.startsWith("libsql://") && !authToken) {
     throw new Error(
@@ -35,6 +37,7 @@ function createDb(): Database {
   }
 
   console.info("[db] creating client", {
+    urlScheme: url.split(":")[0],
     urlHost: url.startsWith("libsql://")
       ? new URL(url.replace("libsql://", "https://")).host
       : "local",
