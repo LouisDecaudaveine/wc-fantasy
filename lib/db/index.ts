@@ -1,11 +1,38 @@
 import { createClient } from "@libsql/client";
 import { drizzle } from "drizzle-orm/libsql";
+import type { LibSQLDatabase } from "drizzle-orm/libsql";
 
 import * as schema from "./schema";
 
-function createDb() {
-  const url = process.env.TURSO_DATABASE_URL ?? "file:local.db";
-  const authToken = process.env.TURSO_AUTH_TOKEN;
+type Database = LibSQLDatabase<typeof schema>;
+
+let dbInstance: Database | undefined;
+
+function resolveDatabaseUrl(): string {
+  const url = process.env.TURSO_DATABASE_URL?.trim();
+
+  if (url) {
+    return url;
+  }
+
+  if (process.env.VERCEL || process.env.NODE_ENV === "production") {
+    throw new Error(
+      "TURSO_DATABASE_URL is not set. Add it to your Vercel project environment variables.",
+    );
+  }
+
+  return "file:local.db";
+}
+
+function createDb(): Database {
+  const url = resolveDatabaseUrl();
+  const authToken = process.env.TURSO_AUTH_TOKEN?.trim();
+
+  if (url.startsWith("libsql://") && !authToken) {
+    throw new Error(
+      "TURSO_AUTH_TOKEN is required when using a remote Turso database.",
+    );
+  }
 
   const client = createClient({
     url,
@@ -15,5 +42,25 @@ function createDb() {
   return drizzle(client, { schema });
 }
 
-export const db = createDb();
-export type Database = typeof db;
+function getDb(): Database {
+  if (!dbInstance) {
+    dbInstance = createDb();
+  }
+
+  return dbInstance;
+}
+
+export const db = new Proxy({} as Database, {
+  get(_target, prop) {
+    const instance = getDb();
+    const value = instance[prop as keyof Database];
+
+    if (typeof value === "function") {
+      return (value as (...args: unknown[]) => unknown).bind(instance);
+    }
+
+    return value;
+  },
+});
+
+export type { Database };
